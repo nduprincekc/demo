@@ -62,19 +62,24 @@ function fmt(n){return "\u20A6"+n.toLocaleString("en-NG")}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function go(v){try{location.hash=v}catch(e){}show(v)}
 function show(v){
- v=v||"build";
+ v=v||"";
  if(v==="thanks")return thanks();
  var m=/^pay-(\w+)$/.exec(v),key=m?m[1]:v;
- if(!S[key])key="build";
+ if(!S[key])return home();
  m?checkout(key):offer(key);
  window.scrollTo(0,0)
+}
+function home(){
+ app.innerHTML='<h1>Our services</h1><p class="sub">Choose a service to see what is included.</p>'+Object.keys(S).map(function(k){var s=S[k];return '<div class="card"><strong>'+esc(s.n)+'</strong><div class="cap">From '+fmt(s.p)+'</div><button class="ghost" data-k="'+k+'">View offer</button></div>'}).join("");
+ var b=app.querySelectorAll("button[data-k]");for(var i=0;i<b.length;i++)b[i].onclick=function(){go(this.getAttribute("data-k"))}
 }
 function offer(k){
  var s=S[k];
  app.innerHTML='<h1>'+esc(s.n)+'</h1><p class="sub">Everything included in this package.</p>'+
  '<div class="card"><div class="price">'+fmt(s.p)+'</div><div class="cap">Booking deposit</div><ul>'+s.i.map(function(x){return "<li>"+CK+"<span>"+esc(x)+"</span></li>"}).join("")+'</ul></div>'+
- '<button id="pay">Continue to payment</button>';
- document.getElementById("pay").onclick=function(){s.pay?(location.href=s.pay):go("pay-"+k)}
+ '<button id="pay">Continue to payment</button><button class="ghost" id="all">View all services</button>';
+ document.getElementById("pay").onclick=function(){s.pay?(location.href=s.pay):go("pay-"+k)};
+ document.getElementById("all").onclick=function(){go("")}
 }
 function checkout(k){
  var s=S[k];
@@ -87,7 +92,7 @@ function checkout(k){
  document.getElementById("back").onclick=function(){go(k)}
 }
 function thanks(){
- app.innerHTML='<div class="card center"><svg class="big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/></svg><h1>Payment received</h1><p class="sub" style="margin:0">Thank you. Our team will contact you shortly to confirm the next steps.</p></div>';
+ app.innerHTML='<div class="card center"><svg class="big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/></svg><h1>Thank you</h1><p class="sub" style="margin:0">Test mode: no payment was taken. In live mode the customer receives a confirmation and the team is notified.</p></div>';
 }
 window.addEventListener("hashchange",function(){show(location.hash.slice(1))});
 show(location.hash.slice(1));
