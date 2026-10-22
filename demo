@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Offers</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--accent:#1f4fd8;--accent-text:#fff;--bg:#f5f6f8;--card:#fff;--text:#14171f;--muted:#5d6472;--line:#e3e6ec}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1218;--card:#181c25;--text:#eef0f4;--muted:#9aa2b1;--line:#2a303c}}
+:root[data-theme="dark"]{--bg:#0f1218;--card:#181c25;--text:#eef0f4;--muted:#9aa2b1;--line:#2a303c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px}
+header div{max-width:600px;margin:0 auto;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
+main{flex:1;width:100%;max-width:600px;margin:0 auto;padding:26px 18px}
+h1{font-size:30px;line-height:1.15;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
+.price{font-size:30px;font-weight:700}
+.cap{color:var(--muted);font-size:14px;margin-top:2px}
+ul{list-style:none;padding:0;margin:18px 0 0}
+li{display:flex;gap:10px;margin-bottom:10px}
+li svg{flex:none;margin-top:3px;color:var(--accent)}
+button{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-text);border:0;border-radius:12px;padding:15px 18px;width:100%;cursor:pointer}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--line);margin-top:10px}
+label{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+input{font:inherit;width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0;font-weight:700}
+.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 10px;margin-bottom:14px}
+.note{font-size:13px;color:var(--muted);margin:14px 0 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+.center{text-align:center}
+.big{width:56px;height:56px;color:var(--accent);margin:4px auto 10px;display:block}
+</style>
+</head>
+<body>
+<header><div><span class="dot"></span><span id="brand"></span></div></header>
+<main id="app"></main>
+<footer id="foot"></footer>
+<script>
+// ---- EDIT PER CLIENT ----
+var BRAND={name:"Your Business Name",accent:"#1f4fd8",footer:"Sample content for demonstration purposes."};
+// pay: paste a hosted payment link (Paystack, Flutterwave, Stripe). Leave empty to use the built-in test checkout.
+var S={
+ build:{n:"Build a house",p:50000,pay:"",i:["Free site visit and consultation","Draft plan and cost estimate","Dedicated project coordinator"]},
+ house:{n:"Buy a house",p:30000,pay:"",i:["Shortlist of ready homes that fit your budget","Guided inspections","Document and title check support"]},
+ land:{n:"Buy land",p:20000,pay:"",i:["Verified land options in your preferred area","Site visit with a representative","Survey and title guidance"]},
+ renovation:{n:"Renovation",p:25000,pay:"",i:["On-site assessment","Itemised renovation quote","Timeline and materials plan"]}
+};
+// -------------------------
+var app=document.getElementById("app");
+document.title=BRAND.name+" | Offers";
+document.getElementById("brand").textContent=BRAND.name;
+document.getElementById("foot").textContent=BRAND.footer;
+document.documentElement.style.setProperty("--accent",BRAND.accent);
+var CK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+function fmt(n){return "\u20A6"+n.toLocaleString("en-NG")}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function go(v){try{location.hash=v}catch(e){}show(v)}
+function show(v){
+ v=v||"build";
+ if(v==="thanks")return thanks();
+ var m=/^pay-(\w+)$/.exec(v),key=m?m[1]:v;
+ if(!S[key])key="build";
+ m?checkout(key):offer(key);
+ window.scrollTo(0,0)
+}
+function offer(k){
+ var s=S[k];
+ app.innerHTML='<h1>'+esc(s.n)+'</h1><p class="sub">Everything included in this package.</p>'+
+ '<div class="card"><div class="price">'+fmt(s.p)+'</div><div class="cap">Booking deposit</div><ul>'+s.i.map(function(x){return "<li>"+CK+"<span>"+esc(x)+"</span></li>"}).join("")+'</ul></div>'+
+ '<button id="pay">Continue to payment</button>';
+ document.getElementById("pay").onclick=function(){s.pay?(location.href=s.pay):go("pay-"+k)}
+}
+function checkout(k){
+ var s=S[k];
+ app.innerHTML='<span class="tag">Test mode</span><h1>Checkout</h1><p class="sub">Review your order and confirm.</p>'+
+ '<div class="card"><div class="row"><span>'+esc(s.n)+'</span><span>'+fmt(s.p)+'</span></div><div class="row"><span>Total due</span><span>'+fmt(s.p)+'</span></div></div>'+
+ '<div class="card"><label for="n">Full name</label><input id="n" autocomplete="name"><label for="e">Email address</label><input id="e" type="email" autocomplete="email">'+
+ '<button id="go" style="margin-top:18px">Pay '+fmt(s.p)+'</button><button class="ghost" id="back">Back</button>'+
+ '<p class="note">Test checkout: no card details are collected and no money moves.</p></div>';
+ document.getElementById("go").onclick=function(){go("thanks")};
+ document.getElementById("back").onclick=function(){go(k)}
+}
+function thanks(){
+ app.innerHTML='<div class="card center"><svg class="big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/></svg><h1>Payment received</h1><p class="sub" style="margin:0">Thank you. Our team will contact you shortly to confirm the next steps.</p></div>';
+}
+window.addEventListener("hashchange",function(){show(location.hash.slice(1))});
+show(location.hash.slice(1));
+</script>
+</body>
+</html>
